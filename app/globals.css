@@ -1,26 +1,387 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ---------- Design tokens (Tailwind v4) ---------- */
+@theme {
+  --color-void: #050509;
+  --color-charcoal: #0b0a12;
+  --color-deep: #160c28;
+  --color-crimson: #ff244f;
+  --color-violet: #9b5cff;
+  --color-lavender: #b9a5e8;
+  --color-ink: #f4f0fa;
+  --color-mist: #a39bb5;
+  --color-line: rgba(155, 92, 255, 0.25);
+
+  --font-display: "Cinzel", Georgia, "Times New Roman", serif;
+  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ---------- Base ---------- */
+html {
+  scroll-behavior: smooth;
+  background: var(--color-void);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-void);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-crimson);
+  outline-offset: 3px;
+}
+
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -4rem;
+  z-index: 100;
+  background: var(--color-charcoal);
+  color: var(--color-ink);
+  border: 1px solid var(--color-crimson);
+  padding: 0.5rem 1rem;
+  transition: top 0.2s;
+}
+.skip-link:focus {
+  top: 1rem;
+}
+
+/* ---------- Landing animations ---------- */
+@keyframes rune-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes rune-glow {
+  0%,
+  100% {
+    filter: brightness(1) saturate(1);
+  }
+  50% {
+    filter: brightness(1.45) saturate(1.2);
+  }
+}
+@keyframes sigil-pulse {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(0.92);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.08);
+  }
+}
+@keyframes moon-pulse {
+  0%,
+  100% {
+    opacity: 0.15;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+@keyframes ember-rise {
+  0% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate3d(var(--dx), -75vh, 0);
+    opacity: 0;
+  }
+}
+@keyframes fog-drift {
+  from {
+    transform: translateX(-5%);
+  }
+  to {
+    transform: translateX(5%);
+  }
+}
+@keyframes zoom-drift {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.05);
+  }
+}
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.rune-spin {
+  animation:
+    rune-spin 90s linear infinite,
+    rune-glow 6s ease-in-out infinite;
+}
+.zoom-drift {
+  transform-origin: 70% 40%;
+  animation: zoom-drift 40s ease-in-out infinite alternate;
+}
+.sigil-glow {
+  mix-blend-mode: screen;
+  animation: sigil-pulse 4.5s ease-in-out infinite;
+}
+.moon-glow {
+  mix-blend-mode: screen;
+  animation: moon-pulse 7s ease-in-out infinite;
+}
+.rise-in {
+  animation: rise-in 1.4s ease-out both;
+}
+.ember {
+  position: absolute;
+  bottom: -12px;
+  border-radius: 9999px;
+  background: #ff244f;
+  box-shadow: 0 0 8px 2px rgba(255, 36, 79, 0.7);
+  opacity: 0;
+  animation: ember-rise var(--dur) linear var(--delay) infinite;
+}
+.ember-violet {
+  background: #b78bff;
+  box-shadow: 0 0 8px 2px rgba(155, 92, 255, 0.7);
+}
+.fog {
+  position: absolute;
+  left: -10%;
+  bottom: 0;
+  width: 120%;
+  height: 40%;
+  background:
+    radial-gradient(ellipse at 30% 60%, rgba(120, 60, 200, 0.28), transparent 60%),
+    radial-gradient(ellipse at 75% 70%, rgba(255, 36, 79, 0.12), transparent 60%);
+  filter: blur(30px);
+  animation: fog-drift 28s ease-in-out infinite alternate;
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .rune-spin,
+  .zoom-drift,
+  .sigil-glow,
+  .moon-glow,
+  .fog,
+  .rise-in {
+    animation: none !important;
+  }
+  .ember {
+    display: none;
+  }
+}
+/* ---------- Utilities ---------- */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.banner-glow {
+  background:
+    radial-gradient(ellipse at 75% 15%, rgba(155, 92, 255, 0.45), transparent 60%),
+    radial-gradient(ellipse at 15% 100%, rgba(255, 36, 79, 0.28), transparent 55%),
+    var(--color-deep);
+}
+/* ---------- Achievements page ---------- */
+@theme {
+  --color-gold: #d4a843;
+  --color-emerald: #3fbf8f;
+}
+
+.tree-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.tree-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes soft-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(63, 191, 143, 0);
+  }
+  50% {
+    box-shadow: 0 0 0 5px rgba(63, 191, 143, 0.14);
+  }
+}
+.pulse-ring {
+  animation: soft-pulse 3.2s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .pulse-ring {
+    animation: none;
+  }
+}/* Achievement tree connection animation */
+@keyframes achievement-edge-flow {
+  to {
+    stroke-dashoffset: -56;
+  }
+}
+
+.achievement-edge-flow {
+  animation: achievement-edge-flow 2.5s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .achievement-edge-flow {
+    animation: none;
+  }
+}
+/* ---------- Golden relic scrollbar ---------- */
+.relic-scroll {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: #d4a843 rgba(255, 255, 255, 0.04);
+  scrollbar-gutter: stable;
+  overscroll-behavior: contain;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 14px,
+    #000 calc(100% - 28px),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 14px,
+    #000 calc(100% - 28px),
+    transparent 100%
+  );
+}
+
+.relic-scroll::-webkit-scrollbar {
+  width: 14px;
+}
+
+.relic-scroll::-webkit-scrollbar-button {
+  display: none;
+}
+
+.relic-scroll::-webkit-scrollbar-track {
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(212, 168, 67, 0.28) 0 1px,
+      transparent 1px 12px
+    ),
+    rgba(8, 7, 12, 0.7);
+  border-left: 1px solid rgba(212, 168, 67, 0.35);
+  border-right: 1px solid rgba(212, 168, 67, 0.12);
+}
+
+.relic-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    180deg,
+    #ffe9a8 0%,
+    #d4a843 45%,
+    #8c6a1c 100%
+  );
+  background-clip: padding-box;
+  border: 3px solid transparent;
+  border-radius: 999px;
+  box-shadow:
+    0 0 12px rgba(212, 168, 67, 0.75),
+    inset 0 0 0 1px rgba(255, 240, 190, 0.55);
+  min-height: 56px;
+}
+
+.relic-scroll::-webkit-scrollbar-thumb:hover,
+.relic-scroll::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(
+    180deg,
+    #fff3c4 0%,
+    #f0c75a 50%,
+    #a8801f 100%
+  );
+  background-clip: padding-box;
+  box-shadow:
+    0 0 18px rgba(240, 199, 90, 0.95),
+    inset 0 0 0 1px rgba(255, 245, 205, 0.7);
+}
+/* ---- Add this to the bottom of your globals.css ---- */
+
+/* Dialogue box entrance */
+@keyframes dialogue-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.dialogue-in {
+  opacity: 0;
+  animation: dialogue-in 0.8s ease-out 0.6s forwards;
+}
+
+/* Typewriter caret */
+@keyframes caret-blink {
+  0%, 50%   { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+.caret {
+  display: inline-block;
+  width: 0.5ch;
+  height: 1.05em;
+  margin-left: 2px;
+  vertical-align: -0.15em;
+  background: #ff244f;
+  box-shadow: 0 0 8px rgba(255, 36, 79, 0.8);
+  animation: caret-blink 0.9s steps(1) infinite;
+}
+
+/* "Continue" cue and final hint */
+@keyframes cue-bob {
+  0%, 100% { transform: translateY(0); opacity: 0.6; }
+  50%      { transform: translateY(3px); opacity: 1; }
+}
+.continue-cue { animation: cue-bob 1.1s ease-in-out infinite; }
+
+@keyframes hint-pulse {
+  0%, 100% { opacity: 0.65; text-shadow: 0 0 0 rgba(255, 36, 79, 0); }
+  50%      { opacity: 1;    text-shadow: 0 0 12px rgba(255, 36, 79, 0.9); }
+}
+.hint-pulse { animation: hint-pulse 1.6s ease-in-out infinite; }
+
+/* Sigil artwork: gentle breathing, brighter when the sigil is hovered */
+@keyframes sigil-breathe {
+  0%, 100% { filter: brightness(1)    drop-shadow(0 0 10px rgba(255, 36, 79, 0.45)); }
+  50%      { filter: brightness(1.18) drop-shadow(0 0 22px rgba(255, 36, 79, 0.8)); }
+}
+.sigil-img {
+  animation: sigil-breathe 3.2s ease-in-out infinite;
+  transition: transform 0.3s ease;
+}
+.landing:has(.sigil-link:hover) .sigil-img,
+.landing:has(.sigil-link:focus-visible) .sigil-img {
+  transform: scale(1.05);
+  filter: brightness(1.45) drop-shadow(0 0 30px rgba(255, 36, 79, 1));
+  animation: none;
+}
+.landing:has(.sigil-link:hover) .sigil-glow,
+.landing:has(.sigil-link:focus-visible) .sigil-glow {
+  filter: brightness(1.7);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dialogue-in { animation: none; opacity: 1; }
+  .caret, .continue-cue, .hint-pulse, .sigil-img { animation: none; }
 }

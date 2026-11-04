@@ -1,0 +1,430 @@
+/* ============================================================
+   ACHIEVEMENTS PAGE - LAYOUT V2
+   Sidebar + banner + column tree. This file loads AFTER
+   achievements.css and overrides the parts that changed.
+   ============================================================ */
+
+/* ---------- branch colors ---------- */
+.tone-purple { --tone: #9b5cff; --tone-rgb: 155, 92, 255; --tone-soft: #cdb4ff; }
+.tone-crimson { --tone: #ff244f; --tone-rgb: 255, 36, 79; --tone-soft: #ffa3b5; }
+.tone-green { --tone: #3fbf8f; --tone-rgb: 63, 191, 143; --tone-soft: #a2edcd; }
+
+/* ---------- header: a thin divider before the subtitle ---------- */
+.ach-sub {
+  align-self: center;
+  max-width: 330px;
+  padding: 2px 0 2px 20px;
+  border-left: 1px solid rgba(255, 36, 79, 0.6);
+}
+
+/* ---------- shell: sidebar + stage ---------- */
+.ach-shell {
+  margin-top: 14px;
+}
+.ach-side {
+  padding: 10px;
+  border: 1px solid rgba(255, 36, 79, 0.26);
+  border-radius: 14px;
+  background: rgba(8, 6, 13, 0.74);
+  backdrop-filter: blur(6px);
+}
+.ach-side ul {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ach-sideitem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.ach-sideitem:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+.ach-sideitem:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+.ach-sideitem .ring {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 42px;
+  height: 42px;
+  border: 2px solid var(--tone, #ff244f);
+  border-radius: 50%;
+  color: var(--tone, #ff244f);
+  background: rgba(var(--tone-rgb, 255, 36, 79), 0.08);
+}
+.ach-sideitem .ring.gold {
+  border-color: var(--c-gold);
+  color: var(--c-gold);
+  background: rgba(212, 168, 67, 0.08);
+}
+.ach-sideitem .tx {
+  flex: 1;
+  min-width: 0;
+}
+.ach-sideitem b {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+}
+.ach-sideitem small {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--c-mist);
+}
+.ach-sideitem .n {
+  flex: none;
+  margin-left: auto;
+  white-space: nowrap;
+  font-size: 13px;
+  color: var(--c-mist);
+  font-variant-numeric: tabular-nums;
+}
+.ach-sideitem.is-active {
+  border-color: rgba(255, 36, 79, 0.6);
+  background: linear-gradient(90deg, rgba(255, 36, 79, 0.28), rgba(255, 36, 79, 0.05));
+  box-shadow: inset 3px 0 0 var(--c-crimson);
+}
+
+/* ---------- banner above the tree ---------- */
+.ach-banner {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 12px 22px;
+  border: 1px solid rgba(255, 36, 79, 0.3);
+  border-radius: 14px;
+  background: linear-gradient(90deg, rgba(48, 12, 26, 0.82), rgba(14, 8, 22, 0.86));
+}
+.ach-crownbadge {
+  position: relative;
+  flex: none;
+  width: 62px;
+  height: 62px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.ach-crownbadge .orb {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 2px solid rgba(212, 168, 67, 0.55);
+  background: radial-gradient(circle at 35% 28%, #261d0d, #0a0710);
+  color: rgba(212, 168, 67, 0.8);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.ach-crownbadge:hover .orb,
+.ach-crownbadge.is-open .orb,
+.ach-crownbadge:focus-visible .orb {
+  transform: scale(1.08);
+}
+.ach-crownbadge:focus-visible {
+  outline: none;
+}
+.ach-crownbadge:focus-visible .orb {
+  outline: 2px solid #fff;
+  outline-offset: 4px;
+}
+.ach-crownbadge .halo {
+  inset: -7px;
+  border-color: rgba(212, 168, 67, 0.6);
+}
+.ach-crownbadge.s-unlocked .orb {
+  border-color: var(--c-gold);
+  color: #fff0c4;
+  background: radial-gradient(circle at 35% 28%, #6e5116, #1c1407);
+  box-shadow: 0 0 34px rgba(212, 168, 67, 0.7);
+}
+.ach-crownbadge.s-progress .orb {
+  animation-name: ach-pulse-gold;
+}
+.ach-btext h2 {
+  margin: 0;
+  font-family: var(--f-display);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+}
+.ach-btext p {
+  margin: 3px 0 0;
+  font-size: 13.5px;
+  color: var(--c-mist);
+}
+.ach-bquote {
+  position: relative;
+  margin: 0 0 0 auto;
+  padding: 0 0 0 26px;
+  max-width: 300px;
+  text-align: right;
+  font-family: var(--f-display);
+  font-size: 15px;
+  line-height: 1.5;
+  color: rgba(244, 240, 250, 0.82);
+}
+.ach-bquote::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 50%;
+  width: 2px;
+  height: 36px;
+  background: var(--c-crimson);
+  box-shadow: 0 0 10px rgba(255, 36, 79, 0.8);
+  transform: translateY(-50%) skewX(-22deg);
+}
+
+/* ---------- the tree columns ---------- */
+.ach-viewport {
+  border-color: rgba(255, 36, 79, 0.26);
+}
+.ach-col .strip {
+  position: absolute;
+  border-left: 1px solid rgba(var(--tone-rgb), 0.16);
+  border-right: 1px solid rgba(var(--tone-rgb), 0.16);
+  background: linear-gradient(180deg, rgba(var(--tone-rgb), 0.07), transparent 78%);
+  transition: opacity 0.3s ease, background 0.3s ease, border-color 0.3s ease;
+}
+.ach-col.is-focus .strip {
+  border-color: rgba(var(--tone-rgb), 0.55);
+  background: linear-gradient(180deg, rgba(var(--tone-rgb), 0.18), rgba(var(--tone-rgb), 0.03) 80%);
+}
+.ach-col .head {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  width: 176px;
+  text-align: center;
+  transform: translate(-50%, -26px);
+  transition: opacity 0.3s ease;
+}
+.ach-col.is-dim .strip,
+.ach-col.is-dim .head {
+  opacity: 0.25;
+}
+.ach-col .hex {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 52px;
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  background: linear-gradient(160deg, var(--tone), rgba(var(--tone-rgb), 0.35));
+  color: var(--tone-soft);
+}
+.ach-col .hex::before {
+  content: "";
+  position: absolute;
+  inset: 2.5px;
+  z-index: -1;
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  background: radial-gradient(circle at 35% 28%, #1b1230, #0b0814);
+}
+.ach-col .ttl {
+  margin-top: 6px;
+  font-family: var(--f-display);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+.ach-col .fan {
+  font-family: var(--f-display);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tone-soft);
+  opacity: 0.85;
+}
+.ach-col .cnt {
+  font-size: 12px;
+  color: var(--c-mist);
+  font-variant-numeric: tabular-nums;
+}
+
+/* nodes that are dimmed by the sidebar choice */
+.ach-node.is-dim {
+  opacity: 0.2;
+  pointer-events: auto;
+}
+
+/* bottom node of each column: where the limbs meet */
+.k-hub {
+  --orb: 52px;
+}
+.k-hub .orb {
+  border-color: var(--tone);
+  color: var(--tone-soft);
+  background: radial-gradient(circle at 35% 28%, rgba(var(--tone-rgb), 0.28), #0c0714);
+  box-shadow: 0 0 0 3px #07050c, 0 0 0 4.5px rgba(var(--tone-rgb), 0.45), 0 0 20px rgba(var(--tone-rgb), 0.4);
+}
+
+/* epic: a gem in the color of its branch */
+.k-epic .halo {
+  border-color: rgba(var(--tone-rgb), 0.55);
+}
+.k-epic .orb {
+  background: linear-gradient(160deg, rgba(var(--tone-rgb), 0.6), rgba(var(--tone-rgb), 0.2));
+}
+.k-epic .orb::before {
+  background: radial-gradient(circle at 35% 28%, rgba(var(--tone-rgb), 0.22), #0b0814);
+}
+.k-epic .orb svg {
+  color: var(--tone-soft);
+  opacity: 0.7;
+}
+.k-epic.s-unlocked {
+  filter: drop-shadow(0 0 12px rgba(var(--tone-rgb), 0.8));
+}
+.k-epic.s-unlocked .orb {
+  background: linear-gradient(160deg, var(--tone-soft), var(--tone));
+}
+.k-epic.s-unlocked .orb::before {
+  background: radial-gradient(circle at 35% 28%, rgba(var(--tone-rgb), 0.55), #120a22);
+}
+.k-epic.s-unlocked .orb svg {
+  color: #fff;
+  opacity: 1;
+}
+.k-epic.s-progress .orb {
+  background: linear-gradient(160deg, #9be8c6, #2c8f68);
+}
+
+/* ---------- one screen: place the shell ---------- */
+@media (min-width: 860px) {
+  .ach-shell {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: 268px minmax(0, 1fr);
+    gap: 16px;
+  }
+  .ach-side {
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+  .ach-stage {
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .ach-banner {
+    flex: none;
+  }
+  .ach-desktop {
+    flex: 1;
+    min-height: 0;
+  }
+}
+@media (min-width: 860px) and (max-height: 820px) {
+  .ach-sideitem {
+    padding: 6px 10px;
+  }
+  .ach-sideitem .ring {
+    width: 34px;
+    height: 34px;
+  }
+  .ach-sideitem small {
+    display: none;
+  }
+  .ach-banner {
+    padding: 8px 18px;
+  }
+  .ach-crownbadge {
+    width: 50px;
+    height: 50px;
+  }
+  .ach-btext h2 {
+    font-size: 18px;
+  }
+}
+@media (min-width: 860px) and (max-width: 1100px) {
+  .ach-shell {
+    grid-template-columns: 220px minmax(0, 1fr);
+  }
+  .ach-bquote {
+    display: none;
+  }
+  .ach-sideitem small {
+    display: none;
+  }
+}
+
+/* ---------- phones: chips + list ---------- */
+@media (max-width: 859px) {
+  .ach-shell {
+    display: block;
+  }
+  .ach-side {
+    padding: 8px;
+  }
+  .ach-side ul {
+    flex-direction: row;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .ach-side ul::-webkit-scrollbar {
+    display: none;
+  }
+  .ach-sideitem {
+    width: auto;
+    flex: none;
+    gap: 8px;
+    padding: 8px 12px;
+    white-space: nowrap;
+  }
+  .ach-sideitem .ring {
+    width: 28px;
+    height: 28px;
+  }
+  .ach-sideitem small {
+    display: none;
+  }
+  .ach-sideitem .n {
+    margin-left: 6px;
+  }
+  .ach-stage {
+    margin-top: 14px;
+  }
+  .ach-banner {
+    flex-wrap: wrap;
+    padding: 12px 16px;
+  }
+  .ach-bquote {
+    display: none;
+  }
+  .ach-list {
+    display: block;
+    margin-top: 18px;
+  }
+  .ach-lgroup header .orb {
+    border-color: var(--tone, rgba(255, 36, 79, 0.7));
+    color: var(--tone-soft, #ffb8c6);
+  }
+}
