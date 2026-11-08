@@ -1,7 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { sfx } from "@/lib/sfx";
 
 // ---- Edit your intro here (3 lines: who you are / your aim / your education)
 const SPEAKER = "The Programmer";
@@ -11,7 +13,14 @@ const LINES = [
   "My aim is simple: keep learning, keep building, and craft products that people actually use.",
   "My training began with a degree in [YOUR DEGREE] at [YOUR COLLEGE]. The learning never stopped.",
 ];
-const HINT = "Press the glowing sigil to find more";
+const HINT = "or press the glowing sigil";
+// Choices shown when the last line is finished (they work as navigation)
+const CHOICES = [
+  { label: "Skills", href: "/skills" },
+  { label: "Projects", href: "/projects" },
+  { label: "Achievements", href: "/achievements" },
+];
+const START_DELAY_MS = 2400; // wait for the opening sequence before speaking
 // -------------------------------------------------------------------------
 
 const SPEED_MS = 26;
@@ -19,6 +28,14 @@ const SPEED_MS = 26;
 export default function Dialogue() {
   const [i, setI] = useState(0);
   const [n, setN] = useState(0);
+  const [ready, setReady] = useState(false);
+  const ticks = useRef(0);
+
+  useEffect(() => {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const t = window.setTimeout(() => setReady(true), reduce ? 0 : START_DELAY_MS);
+    return () => window.clearTimeout(t);
+  }, []);
 
   const line = LINES[i];
   const typing = n < line.length;
@@ -27,24 +44,29 @@ export default function Dialogue() {
 
   // Typewriter
   useEffect(() => {
-    if (!typing) return;
+    if (!typing || !ready) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduce) {
       setN(line.length);
       return;
     }
-    const t = setInterval(() => setN((v) => Math.min(v + 1, line.length)), SPEED_MS);
+    const t = setInterval(() => {
+      if (++ticks.current % 2 === 0) sfx.tick();
+      setN((v) => Math.min(v + 1, line.length));
+    }, SPEED_MS);
     return () => clearInterval(t);
-  }, [i, typing, line.length]);
+  }, [i, typing, ready, line.length]);
 
   const advance = useCallback(() => {
+    if (!ready) return;
+    sfx.click();
     if (typing) {
       setN(line.length);
     } else if (!last) {
       setI((v) => v + 1);
       setN(0);
     }
-  }, [typing, last, line.length]);
+  }, [ready, typing, last, line.length]);
 
   const skip = useCallback(() => {
     setI(LINES.length - 1);
@@ -84,7 +106,7 @@ export default function Dialogue() {
         <span aria-hidden="true" className="absolute -bottom-1.5 -right-1.5 h-2.5 w-2.5 rotate-45 border border-crimson bg-void" />
 
         {/* Portrait: overlaps the top-left like an RPG dialogue frame */}
-        <div className="portrait-frame relative -mt-12 h-20 w-20 shrink-0 overflow-hidden border-2 border-crimson/80 bg-void shadow-[0_0_22px_rgba(255,36,79,0.45)] sm:-mt-16 sm:h-28 sm:w-28">
+        <div className={`portrait-frame ${ready && typing ? "portrait-talk" : "portrait-idle"} relative -mt-12 h-20 w-20 shrink-0 overflow-hidden border-2 border-crimson/80 bg-void shadow-[0_0_22px_rgba(255,36,79,0.45)] sm:-mt-16 sm:h-28 sm:w-28`}>
           <Image
             src={PORTRAIT}
             alt={`${SPEAKER} portrait`}
@@ -118,13 +140,13 @@ export default function Dialogue() {
 
           <p
             aria-hidden="true"
-            className="min-h-[4.5rem] text-sm leading-relaxed text-[#eadcf5] sm:min-h-[5.25rem] sm:text-base"
+            className="dlg-text min-h-[4.75rem] leading-snug text-[#f1e6f8] sm:min-h-[5.75rem]"
           >
             {line.slice(0, n)}
             {typing && <span className="caret" />}
           </p>
 
-          <div className="mt-2 flex items-center justify-between gap-3 text-[10px] uppercase tracking-[0.25em] sm:text-[11px]">
+          <div className="mt-2 flex items-end justify-between gap-3 text-[10px] uppercase tracking-[0.25em] sm:text-[11px]">
             {/* Progress dots */}
             <span className="flex items-center gap-1.5" aria-hidden="true">
               {LINES.map((_, d) => (
@@ -138,8 +160,23 @@ export default function Dialogue() {
             </span>
 
             {finished ? (
-              <span className="hint-pulse text-right text-lavender">{HINT} &rarr;</span>
-            ) : !typing ? (
+              <span className="flex flex-wrap items-center justify-end gap-2">
+                {CHOICES.map((c, k) => (
+                  <Link
+                    key={c.href}
+                    href={c.href}
+                    onClick={(e) => e.stopPropagation()}
+                    onPointerEnter={() => sfx.hover()}
+                    className="choice-in group border border-crimson/60 bg-void/70 px-3 py-1.5 text-[#f4e9f7] transition-colors hover:bg-crimson/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet"
+                    style={{ animationDelay: `${k * 0.12}s` }}
+                  >
+                    <span aria-hidden="true" className="mr-1.5 text-crimson transition-transform group-hover:translate-x-0.5">&#9654;</span>
+                    {c.label}
+                  </Link>
+                ))}
+                <span className="hint-pulse hidden text-lavender/80 lg:inline">{HINT}</span>
+              </span>
+            ) : !typing && ready ? (
               <span className="continue-cue text-lavender" aria-hidden="true">
                 &#9660; Continue
               </span>

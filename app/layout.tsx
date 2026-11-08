@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import "./globals.css";
+import "./hero.css";
 import Navbar from "@/components/Navbar";
 import { site } from "@/data/site";
 

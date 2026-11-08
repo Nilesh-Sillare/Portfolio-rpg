@@ -4,7 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
-import Sigil from "./Sigil";
+import Image from "next/image";
+import { sfx } from "@/lib/sfx";
 import { site, navLinks } from "@/data/site";
 
 export default function Navbar() {
@@ -36,7 +37,14 @@ export default function Navbar() {
           className="flex items-center gap-3"
           onClick={() => setOpen(false)}
         >
-          <Sigil size={30} />
+          <Image
+            src="/sigil.png"
+            alt=""
+            width={36}
+            height={36}
+            className="nav-sigil h-9 w-9 object-contain"
+            priority
+          />
           <span className="font-display text-sm tracking-[0.28em] text-ink md:text-[15px]">
             {site.name}
           </span>
@@ -48,6 +56,7 @@ export default function Navbar() {
             <li key={link.href}>
               <Link
                 href={link.href}
+                onPointerEnter={() => sfx.hover()}
                 aria-current={isActive(link.href) ? "page" : undefined}
                 className={`border-b py-1 text-[12px] tracking-[0.18em] transition-colors duration-300 ${
                   isActive(link.href)

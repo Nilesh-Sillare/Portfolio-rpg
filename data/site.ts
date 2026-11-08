@@ -24,4 +24,5 @@ export const navLinks = [
 export const landing = {
   name: "Nilesh S. Sillare",
   words: ["Code", "Build", "Evolve"],
+  quest: "Ship something real, and learn something new while doing it.", // shown in the hero quest log
 };
