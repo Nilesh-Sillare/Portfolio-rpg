@@ -1,4 +1,4 @@
-// Decorative golden circle for the centre of the page background.
+// Decorative golden circle in the centre of the page background.
 // Pure CSS/SVG, no client JS needed.
 
 const GOLD = "212,168,67";

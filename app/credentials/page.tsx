@@ -39,10 +39,10 @@ export default function CredentialsPage() {
         className="pointer-events-none absolute inset-x-0 top-0 z-[1] h-[420px] bg-[radial-gradient(ellipse_at_80%_0%,rgba(255,36,79,0.18),transparent_60%)]"
       />
 
-      {/* Rotating, rippling golden circle in the centre of the background */}
+      {/* Golden halo behind the carousel */}
       <GoldenRipple />
 
-      <div className="relative z-10 mx-auto flex w-full max-w-[1400px] flex-col px-5 pb-6 pt-24 md:px-8 lg:h-full lg:overflow-y-auto lg:overflow-x-hidden">
+      <div className="relic-scroll relative z-10 mx-auto flex w-full max-w-[1400px] flex-col px-5 pb-6 pt-24 md:px-8 lg:h-full lg:overflow-y-auto lg:overflow-x-hidden lg:pt-[88px]">
         <header className="flex shrink-0 flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="flex items-center gap-3 text-[11px] tracking-[0.35em] text-mist">
@@ -79,7 +79,7 @@ export default function CredentialsPage() {
         </header>
 
         {/* The explorer fills the remaining height, with a minimum so the carousel always fits */}
-        <div className="mt-6 lg:min-h-[660px] lg:flex-1">
+        <div className="mt-6 lg:min-h-[620px] lg:flex-1">
           <CredentialsExplorer />
         </div>
       </div>

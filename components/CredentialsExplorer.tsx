@@ -1,5 +1,5 @@
 "use client";
-
+import CertificateBack from "@/components/CertificateBack";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type {
   CSSProperties,
@@ -615,9 +615,10 @@ export default function CredentialsExplorer() {
     return map;
   }, []);
 
-  // Open with a shared link: /credentials?cert=<id>
+    // Open with a shared link: /credentials?cert=<id>
   useEffect(() => {
     const id = new URLSearchParams(window.location.search).get("cert");
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time read of the URL on mount
     if (id && credentials.some((c) => c.id === id)) setSelectedId(id);
   }, []);
 
@@ -706,11 +707,10 @@ export default function CredentialsExplorer() {
       : featured?.id;
   const activeIndex = Math.max(0, slideIds.indexOf(activeId ?? ""));
 
-  // A flipped card turns back as soon as another card comes to the front
+    // A flipped card turns back as soon as another card comes to the front
   useEffect(() => {
     if (flippedId && flippedId !== activeId) setFlippedId(null);
   }, [activeId, flippedId]);
-
   const onSlideChange = (i: number, auto?: boolean) => {
     const id = slideIds[i];
     if (!id) return;
@@ -863,78 +863,25 @@ export default function CredentialsExplorer() {
               </span>
             </button>
 
-            {/* ---------- BACK ---------- */}
-            <div
-              className="cred-face cred-back cred-plate"
-              aria-hidden={!flipped}
-            >
-              <span className="cred-plate-in">
-                <span aria-hidden="true" className="cred-shine" />
-                <span className="relative z-[1] flex h-full min-h-0 flex-col gap-2 p-3.5">
-                  <span className="flex items-center justify-between gap-2">
-                    <span
-                      className="rounded-md border px-2 py-0.5 text-[11px]"
-                      style={{
-                        color: accent,
-                        borderColor: `${accent}66`,
-                        backgroundColor: `${accent}14`,
-                      }}
-                    >
-                      {labelOf(c.category)}
-                    </span>
-                    <RarityTag color={r.color} label={r.label} />
-                  </span>
-
-                  <span className="line-clamp-2 text-[15px] font-semibold leading-tight text-ink">
-                    {c.title}
-                  </span>
-
-                  <span className="line-clamp-5 min-h-0 text-xs leading-relaxed text-mist">
-                    {c.description}
-                  </span>
-
-                  <ul className="flex flex-wrap gap-1.5">
-                    {c.tags.map((t) => (
-                      <li key={t}>
-                        <button
-                          type="button"
-                          tabIndex={flipped ? 0 : -1}
-                          onClick={() => setTag(tag === t ? null : t)}
-                          className="rounded-lg border border-white/10 bg-white/5 px-2 py-0.5 text-xs text-ink transition-colors hover:border-[var(--accent)]"
-                        >
-                          #{t}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <span className="mt-auto flex flex-wrap items-center gap-2">
-                    {c.url && (
-                      <Link
-                        href={c.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        tabIndex={flipped ? 0 : -1}
-                        className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs text-ink transition-all hover:bg-white/5"
-                        style={{ borderColor: `${accent}b3` }}
-                      >
-                        <ExternalLink size={13} />
-                        View Certificate
-                      </Link>
-                    )}
-                    <button
-                      type="button"
-                      tabIndex={flipped ? 0 : -1}
-                      onClick={() => setFlippedId(null)}
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 px-3 py-1.5 text-xs text-mist transition-colors hover:border-[var(--accent)] hover:text-ink"
-                    >
-                      <RotateCw size={13} />
-                      Back
-                    </button>
-                  </span>
-                </span>
-              </span>
-            </div>
+                        {/* ---------- BACK ---------- */}
+            <CertificateBack
+              title={c.title}
+              issuer={c.issuer}
+              dateLabel={formatDate(c.date)}
+              categoryLabel={labelOf(c.category)}
+              description={c.description}
+              tags={c.tags}
+              url={c.url}
+              accent={accent}
+              rarityLabel={r.label}
+              rarityColor={r.color}
+              Icon={Icon}
+              logo={<PlatformLogo issuer={c.issuer} size={18} />}
+              flipped={flipped}
+              activeTag={tag}
+              onTag={(t) => setTag(tag === t ? null : t)}
+              onBack={() => setFlippedId(null)}
+            />
           </div>
         </div>
       );
@@ -998,6 +945,9 @@ export default function CredentialsExplorer() {
   };
 
   const showImage = featured?.image && !failed[featured.id];
+    // Colour of the stage light = the card at the front (grey for locked cards)
+  const activeCred = credentials.find((c) => c.id === activeId);
+  const spotColor = activeCred ? ACCENTS[activeCred.category] : "#8a8aa3";
 
   return (
     <>
@@ -1152,7 +1102,7 @@ export default function CredentialsExplorer() {
               {/* key = restart the slide-in animation when the certificate changes */}
               <div
                 key={featured.id}
-                className="cred-swap relative grid items-center gap-5 md:grid-cols-[minmax(0,3fr)_minmax(0,8fr)]"
+                className="cred-swap relative grid items-center gap-5 md:grid-cols-[minmax(0,2.6fr)_minmax(0,8fr)]"
               >
                 <div
                   className="relative aspect-[3/2] overflow-hidden rounded-xl border"
@@ -1209,15 +1159,15 @@ export default function CredentialsExplorer() {
                         ? "FEATURED"
                         : labelOf(featured.category).toUpperCase()}
                     </span>
-                    <RarityTag color={fr.color} label={fr.label} />
+                                        <RarityTag color={fr.color} label={fr.label} />
+                    <span className="text-sm text-mist">
+                      {featured.issuer} · {formatDate(featured.date)}
+                    </span>
                   </div>
-                  <h2 className="mt-2 font-display text-xl text-ink md:text-2xl">
+                  <h2 className="mt-1.5 font-display text-xl text-ink">
                     {featured.title}
                   </h2>
-                  <p className="mt-1 text-sm text-mist">
-                    {featured.issuer} · {formatDate(featured.date)}
-                  </p>
-                  <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-mist">
+                  <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-mist">
                     {featured.description}
                   </p>
 
@@ -1246,17 +1196,26 @@ export default function CredentialsExplorer() {
                     </ul>
 
                     <div className="flex flex-wrap gap-2">
-                      {featured.url && (
-                        <Link
-                          href={featured.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex min-h-10 items-center gap-2 rounded-lg border px-4 py-2 text-sm text-ink transition-all hover:bg-white/5 hover:shadow-[0_0_20px_var(--accent)]"
-                          style={{ borderColor: `${fc}b3` }}
-                        >
-                          <ExternalLink size={16} />
-                          View Certificate
-                        </Link>
+                      {featured.url ? (
+  <Link
+    href={featured.url}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="inline-flex min-h-10 items-center gap-2 rounded-lg border px-4 py-2 text-sm text-ink transition-all hover:bg-white/5 hover:shadow-[0_0_20px_var(--accent)]"
+    style={{ borderColor: `${fc}b3`, backgroundColor: `${fc}1a` }}
+  >
+    <ExternalLink size={16} />
+    Credential
+  </Link>
+) :            (
+                  <span
+                  aria-disabled="true"
+                  title="Credential link not added yet"
+                   className="inline-flex min-h-10 cursor-not-allowed items-center gap-2 rounded-lg border border-white/10 px-4 py-2 text-sm text-mist opacity-60"
+                   >
+                  <BadgeCheck size={16} />
+                    Credential
+                       </span>
                       )}
                       <button
                         type="button"
@@ -1313,6 +1272,8 @@ export default function CredentialsExplorer() {
                   autoPlay={!zoomed && !flippedId}
                   autoPlayMs={3500}
                   label="Certificates"
+                  label="Certificates"
+                  spotlight={spotColor}
                 />
               </div>
             </div>

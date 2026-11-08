@@ -19,10 +19,16 @@ type Props = {
   /** milliseconds for ONE card to pass the front while spinning */
   autoPlayMs?: number;
   label?: string;
+  /** colour of the stage light on the front card (any CSS colour) */
+  spotlight?: string;
 };
 
+const GOLD = "212,168,67";
+
 const css = `
-.car-stage{perspective:1400px;perspective-origin:50% 42%}
+@property --spot{syntax:"<color>";inherits:true;initial-value:#d4a843}
+
+.car-stage{perspective:1400px;perspective-origin:50% 42%;transition:--spot .7s ease}
 .car-slide{
   --cut:12px;
   position:absolute;left:50%;top:50%;
@@ -35,9 +41,45 @@ const css = `
   background:#05030a;opacity:var(--dim,0);
   clip-path:polygon(var(--cut) 0,calc(100% - var(--cut)) 0,100% var(--cut),100% calc(100% - var(--cut)),calc(100% - var(--cut)) 100%,var(--cut) 100%,0 calc(100% - var(--cut)),0 var(--cut));
 }
+
+/* ---- Spotlight ---- */
+/* the cone of light falling from the top star */
+.car-beam{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(circle at 50% 0%,color-mix(in srgb,var(--spot) 55%,white) 0,color-mix(in srgb,var(--spot) 30%,transparent) 22px,transparent 150px),
+    conic-gradient(from 142deg at 50% 0%,transparent 0deg,color-mix(in srgb,var(--spot) 34%,transparent) 38deg,transparent 76deg,transparent 360deg);
+  -webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 45%,transparent 92%);
+          mask-image:linear-gradient(to bottom,#000 0%,#000 45%,transparent 92%);
+}
+/* the pool of light on the floor under the front card */
+.car-pool{
+  position:absolute;border-radius:50%;filter:blur(4px);
+  background:radial-gradient(ellipse at center,color-mix(in srgb,var(--spot) 50%,transparent) 0%,color-mix(in srgb,var(--spot) 16%,transparent) 45%,transparent 70%);
+}
+/* light washing over the front card */
+.car-wash{
+  position:absolute;inset:0;mix-blend-mode:screen;
+  background:radial-gradient(ellipse 30% 58% at 50% 44%,color-mix(in srgb,var(--spot) 20%,transparent),transparent 72%);
+}
+/* dark edges so the centre feels lit */
+.car-vignette{
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse 58% 84% at 50% 46%,transparent 40%,rgba(5,3,10,.62) 100%);
+}
+/* dust floating in the beam */
+.car-mote{
+  position:absolute;border-radius:9999px;opacity:0;
+  background:color-mix(in srgb,var(--spot) 60%,white);
+  box-shadow:0 0 6px var(--spot);
+}
+
 @media (prefers-reduced-motion: no-preference){
   @keyframes car-breathe{0%,100%{opacity:.75}50%{opacity:1}}
+  @keyframes car-mote{0%{transform:translateY(14px);opacity:0}25%{opacity:.85}100%{transform:translateY(-64px);opacity:0}}
   .car-ring{animation:car-breathe 6s ease-in-out infinite}
+  .car-beam{animation:car-breathe 5s ease-in-out infinite}
+  .car-mote{animation:car-mote var(--t,6s) linear infinite;animation-delay:var(--dl,0s)}
 }
 `;
 
@@ -53,7 +95,7 @@ function Star({ className }: { className?: string }) {
     <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
       <path
         d="M12 0 14.5 9.5 24 12 14.5 14.5 12 24 9.5 14.5 0 12 9.5 9.5Z"
-        fill="#ff244f"
+        fill="#d4a843"
       />
     </svg>
   );
@@ -67,6 +109,7 @@ export default function CertificateCarousel({
   autoPlay = true,
   autoPlayMs = 3500,
   label = "Certificates",
+  spotlight = "#d4a843",
 }: Props) {
   const n = ids.length;
   const idsKey = ids.join("|");
@@ -103,7 +146,8 @@ export default function CertificateCarousel({
   const cardW0 = Math.min(size.w * 0.6, 270);
   const cardH = Math.max(260, Math.min(size.h * 0.88, cardW0 * 1.5, 440));
   const cardW = Math.min(cardW0, cardH * 0.74);
-  const slots = Math.max(n, 6);
+  // at least 12 slots: neighbours sit 30 degrees apart (gentler angles)
+  const slots = Math.max(n, 12);
   const step = 360 / slots;
   const R = (cardW * 1.06) / 2 / Math.tan(Math.PI / slots);
   const perCard = Math.max(120, R * Math.sin((step * Math.PI) / 180));
@@ -140,17 +184,16 @@ export default function CertificateCarousel({
     };
   });
 
-  // Measure the stage
+    // Measure the stage
   useEffect(() => {
     const el = stageRef.current;
     if (!el) return;
-    const measure = () => setSize({ w: el.clientWidth, h: el.clientHeight });
-    measure();
-    const ro = new ResizeObserver(measure);
+    const ro = new ResizeObserver(() =>
+      setSize({ w: el.clientWidth, h: el.clientHeight }),
+    );
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
-
   // Don't animate while scrolled out of view
   useEffect(() => {
     const el = stageRef.current;
@@ -229,11 +272,12 @@ export default function CertificateCarousel({
         const d = wrapD(i - pos, count);
         const a = d * deg;
         const abs = Math.abs(a);
-        const op = Math.max(0, Math.min(1, (100 - abs) / 36));
+        // fully visible up to ~36 degrees, gone by 58: no edge-on slivers
+        const op = Math.max(0, Math.min(1, (58 - abs) / 22));
         el.style.transform = `translateZ(${-radius}px) rotateY(${a}deg) translateZ(${radius}px)`;
         el.style.opacity = String(op);
         el.style.visibility = op > 0.02 ? "visible" : "hidden";
-        el.style.pointerEvents = abs <= 75 ? "auto" : "none";
+        el.style.pointerEvents = abs <= 50 ? "auto" : "none";
         el.style.zIndex = String(Math.round(1000 - abs * 4));
         el.style.setProperty("--dim", String(Math.min(1, Math.abs(d)) * 0.32));
         // Used by the cards: moving light + seal parallax
@@ -435,34 +479,44 @@ export default function CertificateCarousel({
         onPointerDown={onPointerDown}
         onFocus={onFocus}
         onBlur={onBlur}
-        style={{ touchAction: "pan-y" }}
+        style={{ touchAction: "pan-y", "--spot": spotlight } as CSSProperties}
         className="car-stage relative min-h-0 flex-1 select-none overflow-hidden rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-crimson/60"
       >
         {ready && (
           <>
-            {/* Rings and the central line */}
+            {/* Behind the cards: light beam, floor pool, rings, centre line */}
             <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+              <span className="car-beam" />
               <span
                 className="absolute inset-y-0 left-1/2 w-px"
                 style={{
-                  background:
-                    "linear-gradient(to bottom, transparent, rgba(255,36,79,.85) 12%, rgba(255,36,79,.85) 88%, transparent)",
-                  boxShadow: "0 0 12px rgba(255,36,79,.55)",
+                  background: `linear-gradient(to bottom, transparent, rgba(${GOLD},.6) 12%, rgba(${GOLD},.6) 88%, transparent)`,
+                  boxShadow: `0 0 12px rgba(${GOLD},.4)`,
                 }}
               />
-              <Star className="absolute left-1/2 top-[2%] h-5 w-5 -translate-x-1/2 drop-shadow-[0_0_8px_#ff244f]" />
-              <Star className="absolute bottom-[2%] left-1/2 h-5 w-5 -translate-x-1/2 drop-shadow-[0_0_8px_#ff244f]" />
+              <Star className="absolute left-1/2 top-[2%] h-5 w-5 -translate-x-1/2 drop-shadow-[0_0_8px_#d4a843]" />
+              <Star className="absolute bottom-[2%] left-1/2 h-5 w-5 -translate-x-1/2 drop-shadow-[0_0_8px_#d4a843]" />
               <span
-                className="car-ring"
-                style={ring(cy - cardH / 2 - ringH * 0.55, ringW, "rgba(255,36,79,.55)")}
+                className="car-pool"
+                style={{
+                  left: "50%",
+                  top: cy + cardH / 2 - ringH * 0.85,
+                  width: cardW * 1.9,
+                  height: ringH * 1.5,
+                  transform: "translateX(-50%)",
+                }}
               />
               <span
                 className="car-ring"
-                style={ring(cy - cardH / 2 - ringH * 0.2, ringW * 0.93, "rgba(155,92,255,.5)")}
+                style={ring(cy - cardH / 2 - ringH * 0.55, ringW, `rgba(${GOLD},.6)`)}
               />
               <span
                 className="car-ring"
-                style={ring(cy + cardH / 2 - ringH * 0.45, ringW, "rgba(255,36,79,.55)")}
+                style={ring(cy - cardH / 2 - ringH * 0.2, ringW * 0.93, "rgba(255,226,150,.42)")}
+              />
+              <span
+                className="car-ring"
+                style={ring(cy + cardH / 2 - ringH * 0.45, ringW, `rgba(${GOLD},.6)`)}
               />
             </div>
 
@@ -496,6 +550,32 @@ export default function CertificateCarousel({
                   {renderSlide(id, i === index)}
                 </div>
               ))}
+            </div>
+
+            {/* In front of the cards: dark edges, light on the card, floating dust */}
+            <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+              <span className="car-vignette" />
+              <span className="car-wash" />
+              {Array.from({ length: 9 }, (_, i) => {
+                const x = (((i * 47) % 100) - 50) / 50;
+                const s = 2 + (i % 3);
+                return (
+                  <i
+                    key={i}
+                    className="car-mote"
+                    style={
+                      {
+                        left: `calc(50% + ${(x * cardW * 0.6).toFixed(0)}px)`,
+                        top: `${20 + ((i * 29) % 58)}%`,
+                        width: s,
+                        height: s,
+                        "--t": `${5 + (i % 4)}s`,
+                        "--dl": `${(-i * 0.9).toFixed(1)}s`,
+                      } as CSSProperties
+                    }
+                  />
+                );
+              })}
             </div>
           </>
         )}
@@ -534,7 +614,7 @@ export default function CertificateCarousel({
                 <span
                   className={`block h-2 w-2 rotate-45 transition-all ${
                     i === index
-                      ? "scale-125 bg-crimson shadow-[0_0_8px_#ff244f]"
+                      ? "scale-125 bg-gold shadow-[0_0_8px_#d4a843]"
                       : "border border-white/30"
                   }`}
                 />
