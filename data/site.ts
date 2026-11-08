@@ -3,7 +3,7 @@
 // ============================================================
 
 export const site = {
-  name: "THE ANONYMOUS CODER", // shown in the navbar
+  name: "THE PROGRAMMER", // shown in the navbar
   title: "Nilesh S. Sillare", // browser tab title
   tagline: "Code / Build / Evolve",
   description:
