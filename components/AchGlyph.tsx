@@ -2,7 +2,7 @@
 import type { CSSProperties } from "react";
 import {
   Atom, Braces, Briefcase, Castle, Check, Cloud, Code, Coffee, Compass, Container, Cpu, Crown,
-  Database, FileCode, FlaskConical, Folder, Git, GitBranch, GitPullRequest, Globe, GraduationCap, Hammer,
+  Database, FileCode, FlaskConical, Folder, GitBranch, GitPullRequest, Globe, GraduationCap, Hammer,
   HardDrive, Languages, Layers, LayoutTemplate, Leaf, Lock, Monitor, Palette, Puzzle, Rocket,
   ScrollText, Server, ShieldCheck, Sparkles, Terminal, Trophy, Wind, Workflow, Wrench,
   type LucideIcon,

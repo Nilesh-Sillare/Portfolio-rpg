@@ -1272,7 +1272,6 @@ export default function CredentialsExplorer() {
                   autoPlay={!zoomed && !flippedId}
                   autoPlayMs={3500}
                   label="Certificates"
-                  label="Certificates"
                   spotlight={spotColor}
                 />
               </div>

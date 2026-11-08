@@ -3,6 +3,7 @@
 export const home = {
   eyebrow: "HI, I'M",
   titleLight: "NILESH S. SILLARE",
+  titleAccent: "", // optional red accent word shown after the title, e.g. move "SILLARE" here
   tagline: "Aspiring Developer | Problem Solver | Lifelong Learner",
   intro:
     "I build digital solutions, turn ideas into reality, and constantly seek to grow, one line of code at a time.",
