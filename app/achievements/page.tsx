@@ -1,4 +1,3 @@
-import { Cinzel, Cormorant_Garamond } from "next/font/google";
 import { Crown, Flame, Gem, Hammer } from "lucide-react";
 import { resolveAll, summarize } from "@/lib/achievementsState";
 import AchCount from "@/components/AchCount";
@@ -10,8 +9,8 @@ import AchSelection from "@/components/AchSelection";
 import AchParticles from "@/components/AchParticles";
 import { projects } from "@/data/projects";
 
-const cinzel = Cinzel({ subsets: ["latin"], weight: ["400", "600", "700"] });
-const cormorant = Cormorant_Garamond({ subsets: ["latin"], weight: ["400", "500"], style: ["italic", "normal"] });
+const HEAD_FONT = "Cinzel, serif";
+const SERIF_FONT = "'Cormorant Garamond', serif";
 
 const PROJECTS_COMPLETED = projects.filter((p) => p.status === "Completed").length;
 
@@ -21,9 +20,8 @@ const CARD = { x: 555, y: 52, w: 500, h: 84 };
 export default function AchievementsPage() {
   const resolved = resolveAll(PROJECTS_COMPLETED);
   const s = summarize(resolved);
-  const head = cinzel.style.fontFamily as string;
-  const serif = cormorant.style.fontFamily as string;
-
+  const head = HEAD_FONT;
+  const serif = SERIF_FONT;
   const stats = [
     { Icon: Flame, value: s.unlocked, label: "Unlocked\nAchievements", color: "#ff3b4e" },
     { Icon: Gem, value: s.epics, label: "Epic Paths\nCompleted", color: "#a855f7" },
